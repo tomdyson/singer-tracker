@@ -188,6 +188,13 @@ You can also run the pre-commit hooks manually on all files:
 pre-commit run --all-files
 ```
 
+If you're using Claude projects, you can synchronise this codebase with your project, using [ClaudeSync](https://github.com/jahwag/ClaudeSync):
+
+```bash
+claudesync api login claude.ai # Login to your Claude account
+claudesync sync # Sync this codebase with your Claude project
+```
+
 ## Testing
 
 To run the tests, use the following command:
