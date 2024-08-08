@@ -58,6 +58,43 @@ python face_detection_mic_angle.py
 3. Using this position and the predefined microphone distance, the script calculates the angle the microphone should point to focus on the selected face.
 4. The angle is clamped to stay within the microphone's field of view.
 
+## Details
+
+This project is structured into the following key files:
+
+### `person_tracking.py`
+The main script that orchestrates the application. It:
+- Initializes the camera and face detector
+- Processes the camera feed
+- Handles user interactions (face selection, quitting)
+- Calculates microphone angles based on face positions
+
+### `camera.py`
+Contains the `Camera` class, which encapsulates all camera-related functionality:
+- Connecting to a camera
+- Capturing frames
+- Releasing the camera connection
+- Listing available cameras
+
+### `face_detector.py`
+Houses the `FaceDetector` class, responsible for:
+- Loading the Haar Cascade Classifier
+- Detecting faces in a given frame
+
+### `config.py`
+Stores configuration parameters for the application, including:
+- Stage dimensions (width and depth)
+- Microphone settings (distance and field of view)
+- Camera index (if a specific camera should be used)
+
+### `.pre-commit-config.yaml`
+Configuration file for pre-commit hooks, specifying:
+- Ruff for linting and formatting Python code
+- A check for large files being added to the repository
+
+### `requirements.txt`
+Lists all Python package dependencies required to run the project.
+
 ## Notes
 
 - Face detection accuracy may vary depending on lighting conditions and face angles.
