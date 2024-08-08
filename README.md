@@ -64,10 +64,11 @@ This project is structured into the following key files:
 
 ### `person_tracking.py`
 The main script that orchestrates the application. It:
-- Initializes the camera and face detector
+- Initializes the camera, face detector, and microphone motor
 - Processes the camera feed
 - Handles user interactions (face selection, quitting)
 - Calculates microphone angles based on face positions
+- Controls the microphone motor movement
 
 ### `camera.py`
 Contains the `Camera` class, which encapsulates all camera-related functionality:
@@ -81,11 +82,17 @@ Houses the `FaceDetector` class, responsible for:
 - Loading the Haar Cascade Classifier
 - Detecting faces in a given frame
 
+### `microphone_motor.py`
+Contains classes for microphone motor control:
+- `MicrophoneMotor`: Controls the real hardware motor
+- `DummyMicrophoneMotor`: Simulates motor movement for testing
+
 ### `config.py`
 Stores configuration parameters for the application, including:
 - Stage dimensions (width and depth)
 - Microphone settings (distance and field of view)
 - Camera index (if a specific camera should be used)
+- `DUMMY_MIC` flag to switch between real and dummy motor implementations
 
 ### `.pre-commit-config.yaml`
 Configuration file for pre-commit hooks, specifying:
@@ -93,7 +100,50 @@ Configuration file for pre-commit hooks, specifying:
 - A check for large files being added to the repository
 
 ### `requirements.txt`
-Lists all Python package dependencies required to run the project.
+Lists all Python package dependencies required to run the project, including:
+- OpenCV for image processing and face detection
+- PySerial for communication with the real microphone motor (when used)
+
+## Microphone Motor Control
+
+This project now includes support for controlling a microphone motor to track the selected face. The system can operate in two modes:
+
+1. **Dummy Mode**: For development and testing purposes, using a simulated motor.
+2. **Real Motor Mode**: For actual hardware control (requires additional setup).
+
+### Configuration
+
+The `config.py` file now includes a `DUMMY_MIC` flag to switch between the dummy and real motor implementations:
+
+```python
+# Microphone motor selection
+DUMMY_MIC = True  # Set to False to use the real MicrophoneMotor
+```
+
+Set `DUMMY_MIC` to `True` for development and testing, and `False` when using actual hardware.
+
+### Dummy Microphone Motor
+
+The dummy motor implementation logs its actions to the console, allowing you to test the face tracking and angle calculation without physical hardware.
+
+### Real Microphone Motor
+
+To use the real microphone motor:
+
+1. Ensure you have the necessary hardware setup.
+2. Set `DUMMY_MIC = False` in `config.py`.
+3. Configure the serial port and baudrate in the `MicrophoneMotor` class initialization to match your motor controller setup.
+4. Adjust the command format in the `move_to_angle` method based on your specific motor controller protocol.
+
+## Usage
+
+The microphone motor control is integrated into the main face tracking system. When a face is selected:
+
+1. The system calculates the required angle for the microphone.
+2. It sends a command to move the microphone (either to the dummy or real motor).
+3. The movement is logged (in dummy mode) or executed (in real motor mode).
+
+No additional steps are required to use this feature; it operates automatically when a face is selected.
 
 ## Notes
 
