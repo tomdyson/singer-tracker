@@ -1,0 +1,3 @@
+Tracking a singer on stage using computer vision
+
+I want to build a tool to help audio engineers capture the audio of singers on stage, e.g. in an opera. Singers move around during a performance, and it’s hard to track them manually using a directional microphone. This app will use computer vision from a camera facing the stage, from the back of the auditorium: it will track a singer, sending a signal to a motor which directs the microphone (in the same position as the camera) to the correct angle for the singer’s position. The app is written in Python. If possible, it should run on a Raspberry Pi.
