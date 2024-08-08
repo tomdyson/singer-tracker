@@ -12,19 +12,19 @@ This project implements a person detection and tracking system using computer vi
 ## Setup
 
 1. Clone this repository:
-   ```
+   ```bash
    git clone https://github.com/tomdyson/singer-tracker.git
    cd singer-tracker
    ```
 
 2. Create a virtual environment and activate it:
-   ```
+   ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
    ```
 
 3. Install the required packages:
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
 
@@ -40,7 +40,7 @@ Before running the script, you may want to adjust the following parameters in th
 ## Usage
 
 Run the script:
-```
+```bash
 python face_detection_mic_angle.py
 ```
 
@@ -111,12 +111,12 @@ This project uses pre-commit hooks to maintain code quality and consistency. The
 Before committing changes, make sure to:
 
 1. Install pre-commit if you haven't already:
-   ```
+   ```bash
    pip install pre-commit
    ```
 
 2. Set up the pre-commit hooks:
-   ```
+   ```bash
    pre-commit install
    ```
 
@@ -126,9 +126,19 @@ Before committing changes, make sure to:
    - For issues Ruff can't fix automatically, you'll need to resolve them manually before committing.
 
 You can also run the pre-commit hooks manually on all files:
-```
+```bash
 pre-commit run --all-files
 ```
+
+## Testing
+
+To run the tests, use the following command:
+
+```bash
+make test
+```
+
+This will run all the tests in `test_person_tracking.py`.
 
 ## Contributing
 
