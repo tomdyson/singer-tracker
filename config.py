@@ -10,3 +10,11 @@ CAMERA_INDEX = 0
 
 # Microphone motor selection
 DUMMY_MIC = True  # Set to False to use the real MicrophoneMotor
+
+# Frame processing
+FRAME_SKIP = (
+    3  # Process every 3rd frame. Bigger values mean less frequent face detection.
+)
+
+# Region of Interest (ROI) tracking
+ROI_SCALE = 1.5  # Scale factor for ROI size relative to face size. Larger values increase ROI size.
