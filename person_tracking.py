@@ -3,11 +3,8 @@ import math
 import cv2
 import numpy as np
 
-# Stage and microphone setup parameters
-STAGE_WIDTH = 10  # meters
-STAGE_DEPTH = 5   # meters
-MIC_DISTANCE = 15 # meters from the front center of the stage
-MIC_FOV = 90      # degrees, field of view of the microphone
+from config import CAMERA_INDEX, MIC_DISTANCE, MIC_FOV, STAGE_DEPTH, STAGE_WIDTH
+
 
 def list_available_cameras():
     index = 0
@@ -100,22 +97,26 @@ def connect_to_camera(camera_index):
     cv2.destroyAllWindows()
 
 def main():
-    available_cameras = list_available_cameras()
-    
-    if not available_cameras:
-        print("No cameras found.")
-        return
+    if CAMERA_INDEX is not None:
+        print(f"Using camera index {CAMERA_INDEX} from config.")
+        connect_to_camera(CAMERA_INDEX)
+    else:
+        available_cameras = list_available_cameras()
+        
+        if not available_cameras:
+            print("No cameras found.")
+            return
 
-    print("Available cameras:")
-    for i, camera in enumerate(available_cameras):
-        print(f"{i}: Camera {camera}")
+        print("Available cameras:")
+        for i, camera in enumerate(available_cameras):
+            print(f"{i}: Camera {camera}")
 
-    selection = input("Select a camera by entering its number: ")
-    try:
-        camera_index = available_cameras[int(selection)]
-        connect_to_camera(camera_index)
-    except (ValueError, IndexError):
-        print("Invalid selection. Please run the script again and enter a valid number.")
+        selection = input("Select a camera by entering its number: ")
+        try:
+            camera_index = available_cameras[int(selection)]
+            connect_to_camera(camera_index)
+        except (ValueError, IndexError):
+            print("Invalid selection. Please run the script again and enter a valid number.")
 
 if __name__ == "__main__":
     main()
