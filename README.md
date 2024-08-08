@@ -36,6 +36,12 @@ Before running the script, you may want to adjust the following parameters in th
 - `STAGE_DEPTH`: Depth of the stage in meters
 - `MIC_DISTANCE`: Distance from the microphone to the front center of the stage in meters
 - `MIC_FOV`: Field of view of the microphone in degrees
+- `CAMERA_INDEX`: Specifies which camera to use (set to None to prompt for selection)
+- `DUMMY_MIC`: When True, uses a simulated microphone motor for testing
+- `FRAME_SKIP`: Processes every nth frame for face detection, improving performance
+- `ROI_SCALE`: Scale factor for the Region of Interest size relative to face size
+
+You can adjust these parameters in the `config.py` file to fine-tune the application's behavior for your specific setup and performance requirements.
 
 ## Usage
 
@@ -93,6 +99,8 @@ Stores configuration parameters for the application, including:
 - Microphone settings (distance and field of view)
 - Camera index (if a specific camera should be used)
 - `DUMMY_MIC` flag to switch between real and dummy motor implementations
+- `FRAME_SKIP` to control how often face detection is performed
+- `ROI_SCALE` to determine the size of the Region of Interest for tracking
 
 ### `.pre-commit-config.yaml`
 Configuration file for pre-commit hooks, specifying:
