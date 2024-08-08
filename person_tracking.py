@@ -3,10 +3,19 @@ import math
 import cv2
 
 from camera import Camera
-from config import CAMERA_INDEX, MIC_DISTANCE, MIC_FOV, STAGE_DEPTH, STAGE_WIDTH
+from config import (
+    CAMERA_INDEX,
+    DUMMY_MIC,
+    MIC_DISTANCE,
+    MIC_FOV,
+    STAGE_DEPTH,
+    STAGE_WIDTH,
+)
 from face_detector import FaceDetector
+from microphone_motor import DummyMicrophoneMotor, MicrophoneMotor
 
 selected_face_id = None
+mic_motor = None
 
 
 def select_face(event, x, y, flags, param):
@@ -27,7 +36,7 @@ def calculate_mic_angle(frame_width, frame_height, face_x, face_y):
 
 
 def process_camera_feed(camera, face_detector):
-    global selected_face_id
+    global selected_face_id, mic_motor
     cv2.namedWindow("Face Detection and Tracking")
     cv2.setMouseCallback("Face Detection and Tracking", select_face)
 
@@ -48,6 +57,13 @@ def process_camera_feed(camera, face_detector):
                     frame_width, frame_height, face_center_x, face_center_y
                 )
                 label += f" Angle: {mic_angle:.2f}°"
+
+                # Move the microphone to the calculated angle
+                if mic_motor.move_to_angle(mic_angle):
+                    label += " (Mic Moved)"
+                else:
+                    label += " (Mic Move Failed)"
+
             cv2.putText(
                 frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
             )
@@ -65,6 +81,8 @@ def process_camera_feed(camera, face_detector):
 
 
 def main():
+    global mic_motor
+
     if CAMERA_INDEX is not None:
         print(f"Using camera index {CAMERA_INDEX} from config.")
         camera = Camera(CAMERA_INDEX)
@@ -90,11 +108,19 @@ def main():
 
     face_detector = FaceDetector()
 
+    if DUMMY_MIC:
+        print("Using DummyMicrophoneMotor")
+        mic_motor = DummyMicrophoneMotor()
+    else:
+        print("Using real MicrophoneMotor")
+        mic_motor = MicrophoneMotor()
+
     try:
         camera.connect()
         process_camera_feed(camera, face_detector)
     finally:
         camera.release()
+        mic_motor.close()  # Close the connection to the motor controller
 
 
 if __name__ == "__main__":
