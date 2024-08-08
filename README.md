@@ -64,6 +64,35 @@ python face_detection_mic_angle.py
 - Ensure your camera has a clear view of the stage for best results.
 - The script assumes the camera's field of view matches the stage dimensions. Adjustments may be needed for different setups.
 
+## Development
+
+This project uses pre-commit hooks to maintain code quality and consistency. The pre-commit configuration includes:
+
+- Ruff for linting and formatting Python code
+- A check for large files being added to the repository
+
+Before committing changes, make sure to:
+
+1. Install pre-commit if you haven't already:
+   ```
+   pip install pre-commit
+   ```
+
+2. Set up the pre-commit hooks:
+   ```
+   pre-commit install
+   ```
+
+3. When you commit changes, pre-commit will automatically run the hooks. If there are any issues:
+   - Ruff will attempt to fix formatting and linting issues automatically.
+   - If Ruff makes changes, stage these changes and commit again.
+   - For issues Ruff can't fix automatically, you'll need to resolve them manually before committing.
+
+You can also run the pre-commit hooks manually on all files:
+```
+pre-commit run --all-files
+```
+
 ## Contributing
 
 Contributions to improve the project are welcome. Please feel free to submit issues or pull requests.
