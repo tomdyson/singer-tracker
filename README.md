@@ -1,34 +1,26 @@
 # Opera Camera Pointer
 
-This project implements a person detection and tracking system using computer vision techniques. It's designed to assist in following performers on stage, potentially for automated camera or microphone positioning in opera or theater productions.
+This project implements a person detection and tracking system using computer vision techniques. It's designed to assist in following performers on stage, potentially for automated camera or microphone positioning in opera or theatre productions.
 
 ## Features
 
-- Detects multiple persons in a video stream
-- Allows user to select a specific person to track
-- Highlights the selected person with a different color bounding box
-- Supports multiple camera inputs
+- Real-time face detection using OpenCV's Haar Cascade Classifier
+- Interactive face selection
+- Microphone angle calculation based on the selected face's position
+- Support for multiple camera inputs
 
-## Prerequisites
-
-Before you begin, ensure you have met the following requirements:
-
-- Python 3.6 or higher
-- OpenCV with contrib modules
-- A webcam or other camera connected to your computer
-
-## Installation
+## Setup
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/opera-camera-pointer.git
-   cd opera-camera-pointer
+   git clone https://github.com/tomdyson/singer-tracker.git
+   cd singer-tracker
    ```
 
-2. Create a virtual environment (optional but recommended):
+2. Create a virtual environment and activate it:
    ```
    python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
    ```
 
 3. Install the required packages:
@@ -36,37 +28,45 @@ Before you begin, ensure you have met the following requirements:
    pip install -r requirements.txt
    ```
 
-4. Download the model files from https://github.com/chuanqi305/MobileNet-SSD/tree/master:
-   - `deploy.prototxt`
-   - `mobilenet_iter_73000.caffemodel`
+## Configuration
 
-   Place these files in the project root directory.
+Before running the script, you may want to adjust the following parameters in the script to match your setup:
+
+- `STAGE_WIDTH`: Width of the stage in meters
+- `STAGE_DEPTH`: Depth of the stage in meters
+- `MIC_DISTANCE`: Distance from the microphone to the front center of the stage in meters
+- `MIC_FOV`: Field of view of the microphone in degrees
 
 ## Usage
 
-To run the application:
+Run the script:
+```
+python face_detection_mic_angle.py
+```
 
-1. Ensure your camera is connected.
-2. Run the script:
-   ```
-   python person_tracking.py
-   ```
-3. Select a camera when prompted.
-4. The application window will open, showing the camera feed with detected persons in green bounding boxes.
-5. Click on a person to select them for tracking. The selected person will be highlighted with a red bounding box.
-6. Press 'r' to reset the selection.
-7. Press 'q' to quit the application.
+- You will be prompted to select a camera input.
+- The application window will open, showing the camera feed with detected faces outlined in green.
+- Click on a face to select it for tracking. The selected face will be outlined in red.
+- The calculated microphone angle for the selected face will be displayed above the face.
+- Press 'r' to reset the face selection.
+- Press 'q' to quit the application.
 
-## File Descriptions
+## How it Works
 
-- `person_tracking.py`: The main Python script containing the person detection and tracking logic.
-- `requirements.txt`: Lists all the Python dependencies for this project.
-- `deploy.prototxt`: The model architecture file for the MobileNet-SSD neural network.
-- `mobilenet_iter_73000.caffemodel`: The pre-trained weights for the MobileNet-SSD model.
+1. The script uses OpenCV's Haar Cascade Classifier to detect faces in each frame from the camera.
+2. When a face is selected, the script calculates its position relative to the stage dimensions.
+3. Using this position and the predefined microphone distance, the script calculates the angle the microphone should point to focus on the selected face.
+4. The angle is clamped to stay within the microphone's field of view.
+
+## Notes
+
+- Face detection accuracy may vary depending on lighting conditions and face angles.
+- Ensure your camera has a clear view of the stage for best results.
+- The script assumes the camera's field of view matches the stage dimensions. Adjustments may be needed for different setups.
 
 ## Contributing
 
-Contributions to this project are welcome. Please fork the repository and create a pull request with your changes.
+Contributions to improve the project are welcome. Please feel free to submit issues or pull requests.
 
 ## License
 
@@ -74,12 +74,10 @@ Contributions to this project are welcome. Please fork the repository and create
 
 ## Acknowledgements
 
-- This project uses the MobileNet-SSD model for person detection.
 - OpenCV is used for image processing and computer vision tasks.
 
 ## Future Improvements
 
-- Implement angle calculation for motor control
 - Add support for multiple camera views
 - Improve tracking persistence when a person is temporarily obscured
 - Implement a graphical user interface for easier control

@@ -3,11 +3,11 @@ import math
 import cv2
 import numpy as np
 
+# Stage and microphone setup parameters
 STAGE_WIDTH = 10  # meters
-STAGE_DEPTH = 5  # meters
-MIC_DISTANCE = 15  # meters from the front center of the stage
-MIC_FOV = 90  # degrees, field of view of the microphone
-
+STAGE_DEPTH = 5   # meters
+MIC_DISTANCE = 15 # meters from the front center of the stage
+MIC_FOV = 90      # degrees, field of view of the microphone
 
 def list_available_cameras():
     index = 0
@@ -22,53 +22,27 @@ def list_available_cameras():
         index += 1
     return cameras
 
+def load_face_detector():
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    return face_cascade
 
-def load_model():
-    config_file = "deploy.prototxt"
-    model_file = "mobilenet_iter_73000.caffemodel"
-    net = cv2.dnn.readNetFromCaffe(config_file, model_file)
-    return net
+def detect_faces(frame, face_cascade):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    return faces
 
-
-def detect_persons(frame, net):
-    blob = cv2.dnn.blobFromImage(
-        cv2.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5
-    )
-    net.setInput(blob)
-    detections = net.forward()
-    return detections
-
-
-def draw_detections(frame, detections, confidence_threshold=0.2):
-    height, width = frame.shape[:2]
-    boxes = []
-    for i in range(detections.shape[2]):
-        confidence = detections[0, 0, i, 2]
-        if confidence > confidence_threshold:
-            class_id = int(detections[0, 0, i, 1])
-            if (
-                class_id == 15
-            ):  # Class ID 15 represents the "person" class in MobileNet-SSD
-                box = detections[0, 0, i, 3:7] * np.array(
-                    [width, height, width, height]
-                )
-                (startX, startY, endX, endY) = box.astype("int")
-                boxes.append((startX, startY, endX, endY))
-    return boxes
-
-
-def select_person(event, x, y, flags, param):
-    global selected_person_id
+def select_face(event, x, y, flags, param):
+    global selected_face_id
     if event == cv2.EVENT_LBUTTONDOWN:
-        for i, box in enumerate(param):
-            if box[0] < x < box[2] and box[1] < y < box[3]:
-                selected_person_id = i
+        for i, (fx, fy, fw, fh) in enumerate(param):
+            if fx < x < fx + fw and fy < y < fy + fh:
+                selected_face_id = i
                 break
 
-def calculate_mic_angle(frame_width, frame_height, person_x, person_y):
+def calculate_mic_angle(frame_width, frame_height, face_x, face_y):
     # Convert frame coordinates to stage coordinates
-    stage_x = (person_x / frame_width - 0.5) * STAGE_WIDTH
-    stage_y = (1 - person_y / frame_height) * STAGE_DEPTH
+    stage_x = (face_x / frame_width - 0.5) * STAGE_WIDTH
+    stage_y = (1 - face_y / frame_height) * STAGE_DEPTH
 
     # Calculate angle
     angle = math.degrees(math.atan2(stage_x, MIC_DISTANCE + stage_y))
@@ -79,17 +53,17 @@ def calculate_mic_angle(frame_width, frame_height, person_x, person_y):
     return clamped_angle
 
 def connect_to_camera(camera_index):
-    global selected_person_id
-    selected_person_id = None
+    global selected_face_id
+    selected_face_id = None
     
     cap = cv2.VideoCapture(camera_index)
     if not cap.isOpened():
         print(f"Error: Could not open camera {camera_index}.")
         return
 
-    net = load_model()
-    cv2.namedWindow('Person Detection and Tracking')
-    cv2.setMouseCallback('Person Detection and Tracking', select_person)
+    face_cascade = load_face_detector()
+    cv2.namedWindow('Face Detection and Tracking')
+    cv2.setMouseCallback('Face Detection and Tracking', select_face)
 
     while True:
         ret, frame = cap.read()
@@ -98,38 +72,36 @@ def connect_to_camera(camera_index):
             break
 
         frame_height, frame_width = frame.shape[:2]
-        detections = detect_persons(frame, net)
-        boxes = draw_detections(frame, detections)
+        faces = detect_faces(frame, face_cascade)
 
-        for i, (startX, startY, endX, endY) in enumerate(boxes):
-            color = (0, 0, 255) if i == selected_person_id else (0, 255, 0)
-            cv2.rectangle(frame, (startX, startY), (endX, endY), color, 2)
-            label = f"Person {i}"
-            if i == selected_person_id:
+        for i, (x, y, w, h) in enumerate(faces):
+            color = (0, 0, 255) if i == selected_face_id else (0, 255, 0)
+            cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
+            label = f"Face {i}"
+            if i == selected_face_id:
                 label += " (Selected)"
-                # Calculate center of the bounding box
-                person_x = (startX + endX) / 2
-                person_y = (startY + endY) / 2
-                mic_angle = calculate_mic_angle(frame_width, frame_height, person_x, person_y)
+                # Calculate center of the face
+                face_center_x = x + w / 2
+                face_center_y = y + h / 2
+                mic_angle = calculate_mic_angle(frame_width, frame_height, face_center_x, face_center_y)
                 label += f" Angle: {mic_angle:.2f}°"
-            cv2.putText(frame, label, (startX, startY - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-        cv2.setMouseCallback('Person Detection and Tracking', select_person, param=boxes)
-        cv2.imshow('Person Detection and Tracking', frame)
+        cv2.setMouseCallback('Face Detection and Tracking', select_face, param=faces)
+        cv2.imshow('Face Detection and Tracking', frame)
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             break
         elif key == ord('r'):
-            selected_person_id = None
+            selected_face_id = None
 
     cap.release()
     cv2.destroyAllWindows()
 
-
 def main():
     available_cameras = list_available_cameras()
-
+    
     if not available_cameras:
         print("No cameras found.")
         return
@@ -143,10 +115,7 @@ def main():
         camera_index = available_cameras[int(selection)]
         connect_to_camera(camera_index)
     except (ValueError, IndexError):
-        print(
-            "Invalid selection. Please run the script again and enter a valid number."
-        )
-
+        print("Invalid selection. Please run the script again and enter a valid number.")
 
 if __name__ == "__main__":
     main()
