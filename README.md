@@ -2,12 +2,20 @@
 
 This project implements a person detection and tracking system using computer vision techniques. It's designed to assist in following performers on stage, potentially for automated camera or microphone positioning in opera or theatre productions.
 
+In this demo, the application identifies two possible faces to track; the user selects one; the application creates a region of interest (ROI) around that face, and logs the angle which would be supplied to the attached microphone.
+
+https://github.com/user-attachments/assets/f97125fb-ee19-4528-a267-7edaab8441be
+
 ## Features
 
 - Real-time face detection using OpenCV's Haar Cascade Classifier
 - Interactive face selection
 - Microphone angle calculation based on the selected face's position
 - Support for multiple camera inputs
+
+## Limitations
+
+- The angle is currently only calculated for the horizontal plane
 
 ## Setup
 
