@@ -1,13 +1,13 @@
 import math
 
 import cv2
-import numpy as np
 
 from camera import Camera
 from config import CAMERA_INDEX, MIC_DISTANCE, MIC_FOV, STAGE_DEPTH, STAGE_WIDTH
 from face_detector import FaceDetector
 
 selected_face_id = None
+
 
 def select_face(event, x, y, flags, param):
     global selected_face_id
@@ -17,17 +17,19 @@ def select_face(event, x, y, flags, param):
                 selected_face_id = i
                 break
 
+
 def calculate_mic_angle(frame_width, frame_height, face_x, face_y):
     stage_x = (face_x / frame_width - 0.5) * STAGE_WIDTH
     stage_y = (1 - face_y / frame_height) * STAGE_DEPTH
     angle = math.degrees(math.atan2(stage_x, MIC_DISTANCE + stage_y))
-    clamped_angle = max(min(angle, MIC_FOV/2), -MIC_FOV/2)
+    clamped_angle = max(min(angle, MIC_FOV / 2), -MIC_FOV / 2)
     return clamped_angle
+
 
 def process_camera_feed(camera, face_detector):
     global selected_face_id
-    cv2.namedWindow('Face Detection and Tracking')
-    cv2.setMouseCallback('Face Detection and Tracking', select_face)
+    cv2.namedWindow("Face Detection and Tracking")
+    cv2.setMouseCallback("Face Detection and Tracking", select_face)
 
     while True:
         frame = camera.get_frame()
@@ -36,26 +38,31 @@ def process_camera_feed(camera, face_detector):
 
         for i, (x, y, w, h) in enumerate(faces):
             color = (0, 0, 255) if i == selected_face_id else (0, 255, 0)
-            cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
+            cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
             label = f"Face {i}"
             if i == selected_face_id:
                 label += " (Selected)"
                 face_center_x = x + w / 2
                 face_center_y = y + h / 2
-                mic_angle = calculate_mic_angle(frame_width, frame_height, face_center_x, face_center_y)
+                mic_angle = calculate_mic_angle(
+                    frame_width, frame_height, face_center_x, face_center_y
+                )
                 label += f" Angle: {mic_angle:.2f}°"
-            cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            cv2.putText(
+                frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
+            )
 
-        cv2.setMouseCallback('Face Detection and Tracking', select_face, param=faces)
-        cv2.imshow('Face Detection and Tracking', frame)
+        cv2.setMouseCallback("Face Detection and Tracking", select_face, param=faces)
+        cv2.imshow("Face Detection and Tracking", frame)
 
         key = cv2.waitKey(1) & 0xFF
-        if key == ord('q'):
+        if key == ord("q"):
             break
-        elif key == ord('r'):
+        elif key == ord("r"):
             selected_face_id = None
 
     cv2.destroyAllWindows()
+
 
 def main():
     if CAMERA_INDEX is not None:
@@ -76,7 +83,9 @@ def main():
             camera_index = available_cameras[int(selection)]
             camera = Camera(camera_index)
         except (ValueError, IndexError):
-            print("Invalid selection. Please run the script again and enter a valid number.")
+            print(
+                "Invalid selection. Please run the script again and enter a valid number."
+            )
             return
 
     face_detector = FaceDetector()
@@ -86,6 +95,7 @@ def main():
         process_camera_feed(camera, face_detector)
     finally:
         camera.release()
+
 
 if __name__ == "__main__":
     main()
